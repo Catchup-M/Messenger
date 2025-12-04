@@ -4,6 +4,7 @@ function ChatView({ showChat, closeChat }) {
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [hasText, setHasText] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
   const [messages, setMessages] = useState([
     { id: 1, type: 'image', imageUrl: 'https://i.ibb.co/fKxWKb3/Screenshot-20251129-120749.jpg', time: '17:06', sent: true, date: 'Tuesday' }
   ]);
@@ -11,6 +12,21 @@ function ChatView({ showChat, closeChat }) {
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
   const stickyDateRef = useRef(null);
+
+  // Handle viewport resize for dynamic height
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.visualViewport?.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.visualViewport?.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   const toggleKeyboard = () => {
     setIsKeyboardActive(!isKeyboardActive);
@@ -194,8 +210,7 @@ function ChatView({ showChat, closeChat }) {
         overflowY: 'auto',
         overflowX: 'hidden',
         display: 'flex',
-        flexDirection: 'column',
-        paddingBottom: 'calc(56px + env(safe-area-inset-bottom, 0px))'
+        flexDirection: 'column'
       }}>
         <div style={{ 
           flex: 1,
@@ -203,7 +218,7 @@ function ChatView({ showChat, closeChat }) {
         }}></div>
         <div style={{
           padding: '16px',
-          paddingBottom: showEmojiPicker ? 'calc(420px + env(safe-area-inset-bottom, 0px))' : 'calc(120px + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: showEmojiPicker ? '420px' : '120px',
           display: 'flex',
           flexDirection: 'column',
           gap: '8px',

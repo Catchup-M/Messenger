@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <title>Telegram Chat</title>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -18,7 +18,17 @@
       margin: 0;
       padding: 0;
       height: 100%;
+      height: 100dvh; /* Dynamic viewport height for modern browsers */
       overflow: hidden;
+      position: fixed;
+      width: 100%;
+    }
+
+    /* Support for older browsers */
+    @supports not (height: 100dvh) {
+      body, html {
+        height: 100vh;
+      }
     }
 
     .content {
@@ -29,21 +39,24 @@
     .footer {
       position: fixed;
       bottom: 0;
+      bottom: max(0px, env(safe-area-inset-bottom));
       left: 0;
       right: 0;
       background: #fff;
       padding: 5px 10px;
-      padding-bottom: calc(5px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: calc(5px + max(0px, env(safe-area-inset-bottom)));
       display: flex;
       align-items: center;
       border: none;
       z-index: 10;
       transition: bottom 0.3s ease;
       min-height: 56px;
+      box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .footer.emoji-open {
       bottom: 300px;
+      bottom: calc(300px + max(0px, env(safe-area-inset-bottom)));
     }
 
     .footer svg.left-icon {
@@ -137,6 +150,7 @@
       z-index: 2;
       display: flex;
       flex-direction: column;
+      padding-bottom: max(56px, calc(56px + env(safe-area-inset-bottom)));
     }
 
     .chat-view.translate-x-0 {
@@ -146,6 +160,7 @@
     .emoji-picker {
       position: fixed;
       bottom: 0;
+      bottom: max(0px, env(safe-area-inset-bottom));
       left: 0;
       right: 0;
       height: 300px;
@@ -154,7 +169,6 @@
       transform: translateY(100%);
       z-index: 8;
       border-top: 1px solid #e5e5e5;
-      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     .emoji-picker.show {

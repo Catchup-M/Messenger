@@ -23,17 +23,13 @@ function ChatView({ showChat, closeChat }) {
       setIsKeyboardActive(false);
     }
     
-    // Multiple scroll attempts to handle keyboard delay
     const scrollToBottom = () => {
       if (chatContainerRef.current) {
         chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
       }
     };
     
-    // Immediate scroll
     scrollToBottom();
-    
-    // Additional scrolls with delays to catch keyboard appearance
     setTimeout(scrollToBottom, 100);
     setTimeout(scrollToBottom, 300);
     setTimeout(scrollToBottom, 500);
@@ -43,7 +39,6 @@ function ChatView({ showChat, closeChat }) {
     const text = e.currentTarget.textContent.trim();
     setHasText(text.length > 0);
     
-    // Scroll to bottom while typing
     setTimeout(() => {
       if (chatContainerRef.current) {
         chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -99,7 +94,6 @@ function ChatView({ showChat, closeChat }) {
     }
   }, [showEmojiPicker, showChat]);
 
-  // Handle scroll to show/hide sticky date
   useEffect(() => {
     const scrollContainer = chatContainerRef.current;
     if (!scrollContainer || !showChat) return;
@@ -116,7 +110,6 @@ function ChatView({ showChat, closeChat }) {
       dateSeparators.forEach(separator => {
         const rect = separator.getBoundingClientRect();
         
-        // Check if date badge has scrolled past the header
         if (rect.top <= chatHeaderHeight && rect.bottom >= 0) {
           shouldShowSticky = true;
           const badge = separator.querySelector('.date-badge');
@@ -140,7 +133,6 @@ function ChatView({ showChat, closeChat }) {
 
     scrollContainer.addEventListener('scroll', handleScroll);
     
-    // Initial check
     setTimeout(handleScroll, 100);
     
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
@@ -148,7 +140,6 @@ function ChatView({ showChat, closeChat }) {
 
   return (
     <div className={`chat-view ${showChat ? 'translate-x-0' : ''}`}>
-      {/* Chat Header */}
       <div style={{ background: '#fff', borderBottom: '1px solid #e5e5e5' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px' }}>
           <button 
@@ -177,7 +168,6 @@ function ChatView({ showChat, closeChat }) {
         </div>
       </div>
 
-      {/* Sticky Date at Top */}
       <div className="sticky-date" ref={stickyDateRef}>
         <div className="date-badge"></div>
       </div>
@@ -361,11 +351,9 @@ function ChatView({ showChat, closeChat }) {
         <div ref={messagesEndRef} />
         </div>
 
-        {/* Emoji Picker (Messenger-style inline) */}
         <div className={`emoji-picker ${showEmojiPicker ? 'show' : ''}`}>
         </div>
 
-        {/* Footer - Hybrid Sticky */}
         <div className="footer">
           <svg className="left-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <g className="attachment-clip-outline">
@@ -436,4 +424,6 @@ function ChatView({ showChat, closeChat }) {
   );
 }
 
-export default ChatView;
+// Make ChatView available globally
+window.ChatView = ChatView;
+

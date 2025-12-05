@@ -254,6 +254,8 @@ function ChatView({ showChat, closeChat }) {
             );
           }
           
+          if (!message.text) return null;
+          
           const isLongMessage = message.text.length > 50;
           const isMediumMessage = message.text.length > 30 && message.text.length <= 50;
           

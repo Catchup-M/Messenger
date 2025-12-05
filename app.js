@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import ChatView from './ChatView';
+const { useState } = React;
 
 function App() {
   const [showChat, setShowChat] = useState(false);
@@ -90,4 +89,5 @@ function App() {
   );
 }
 
-export default App;
+// Render the app
+ReactDOM.render(<App />, document.getElementById('root'));

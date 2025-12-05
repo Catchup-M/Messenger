@@ -4,7 +4,6 @@ function ChatView({ showChat, closeChat }) {
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [hasText, setHasText] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
   const [messages, setMessages] = useState([
     { id: 1, type: 'image', imageUrl: 'https://i.ibb.co/fKxWKb3/Screenshot-20251129-120749.jpg', time: '17:06', sent: true, date: 'Tuesday' }
   ]);
@@ -13,20 +12,43 @@ function ChatView({ showChat, closeChat }) {
   const chatContainerRef = useRef(null);
   const stickyDateRef = useRef(null);
 
-  // Handle viewport resize for dynamic height
-  useEffect(() => {
-    const handleResize = () => {
-      setViewportHeight(window.innerHeight);
+  // Detect browser type
+  const detectBrowser = () => {
+    const ua = navigator.userAgent;
+    const isIOS = /iPhone|iPad|iPod/.test(ua);
+    const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua);
+    const isChrome = /Chrome/.test(ua) && !/Edge/.test(ua);
+    const isFirefox = /Firefox/.test(ua);
+    const isSamsungBrowser = /SamsungBrowser/.test(ua);
+    
+    return {
+      isIOS,
+      isSafari,
+      isChrome,
+      isFirefox,
+      isSamsungBrowser,
+      isMobile: /Mobile|Android/.test(ua)
     };
+  };
 
-    window.addEventListener('resize', handleResize);
-    window.visualViewport?.addEventListener('resize', handleResize);
+  const browser = detectBrowser();
 
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.visualViewport?.removeEventListener('resize', handleResize);
-    };
-  }, []);
+  // Calculate padding based on browser
+  const getFooterPadding = () => {
+    if (browser.isIOS || browser.isSafari) {
+      // iOS needs less padding since footer is at bottom: 0
+      return showEmojiPicker ? '370px' : '90px';
+    } else if (browser.isFirefox && browser.isMobile) {
+      // Firefox mobile needs adjusted padding
+      return showEmojiPicker ? '370px' : '90px';
+    } else if (browser.isSamsungBrowser) {
+      // Samsung browser needs adjusted padding
+      return showEmojiPicker ? '370px' : '90px';
+    } else {
+      // Chrome and others use original padding
+      return showEmojiPicker ? '420px' : '120px';
+    }
+  };
 
   const toggleKeyboard = () => {
     setIsKeyboardActive(!isKeyboardActive);
@@ -218,7 +240,7 @@ function ChatView({ showChat, closeChat }) {
         }}></div>
         <div style={{
           padding: '16px',
-          paddingBottom: showEmojiPicker ? '420px' : '120px',
+          paddingBottom: getFooterPadding(),
           display: 'flex',
           flexDirection: 'column',
           gap: '8px',

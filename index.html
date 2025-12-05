@@ -27,14 +27,18 @@
     }
 
     .footer {
-      position: sticky;
+      position: relative;
       bottom: 0;
+      left: 0;
+      right: 0;
       background: #fff;
       padding: 5px 10px;
       display: flex;
       align-items: center;
       border: none;
+      z-index: 10;
       height: 56px;
+      flex-shrink: 0;
     }
 
     .footer svg.left-icon {
@@ -212,4 +216,3 @@
   <script type="text/babel" src="app.js"></script>
 </body>
 </html>
-

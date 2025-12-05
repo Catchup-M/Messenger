@@ -353,6 +353,7 @@ function ChatView({ showChat, closeChat }) {
 
         <div className={`emoji-picker ${showEmojiPicker ? 'show' : ''}`}>
         </div>
+        </div>
 
         <div className="footer">
           <svg className="left-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -426,4 +427,3 @@ function ChatView({ showChat, closeChat }) {
 
 // Make ChatView available globally
 window.ChatView = ChatView;
-

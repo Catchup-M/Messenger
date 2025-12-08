@@ -36,38 +36,26 @@
 <div id="root"></div>
 
 <script type="text/babel">
-const { useState, useRef } = React;
+const { useState, useRef, useEffect } = React;
 
 function FooterChatBar() {
   const [message, setMessage] = useState('');
   const [showChat, setShowChat] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef(null);
   const contentRef = useRef(null);
 
-  // Sample messages with different lengths
-  const messages = [
+  const [messages, setMessages] = useState([
     { text: "Hey!", time: "10:30", sent: true },
     { text: "How are you doing today?", time: "10:31", sent: false },
     { text: "I'm doing great, thanks for asking!", time: "10:32", sent: true },
     { text: "Hey bro how are you doing my dear hope everything is going well and you're having a great day", time: "10:33", sent: false },
     { text: "Yes everything is fine", time: "10:34", sent: true },
-  ];
+  ]);
 
   const handleInput = (e) => {
     const text = e.currentTarget.textContent;
     setMessage(text);
-    
-    if (text.trim() === '') {
-      e.currentTarget.textContent = '';
-    }
-  };
-
-  const sendMessage = () => {
-    console.log('Send message:', message);
-    if (inputRef.current) {
-      inputRef.current.textContent = '';
-      setMessage('');
-    }
   };
 
   const handleAttachment = () => {
@@ -76,6 +64,42 @@ function FooterChatBar() {
 
   const handleMicrophone = () => {
     console.log('Microphone clicked');
+  };
+
+  const scrollToBottom = () => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = contentRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const sendMessage = () => {
+    const textToSend = inputRef.current?.textContent?.trim() || '';
+    
+    if (!textToSend) {
+      return;
+    }
+    
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const timeString = hours + ':' + (minutes < 10 ? '0' + minutes : minutes);
+    
+    const newMessage = {
+      text: textToSend,
+      time: timeString,
+      sent: true
+    };
+    
+    setMessages(prevMessages => [...prevMessages, newMessage]);
+    
+    if (inputRef.current) {
+      inputRef.current.textContent = '';
+    }
+    setMessage('');
   };
 
   const openChat = () => {
@@ -94,6 +118,13 @@ function FooterChatBar() {
     setShowChat(false);
   };
 
+  const toggleEmojiPicker = () => {
+    setShowEmojiPicker(!showEmojiPicker);
+    if (!showEmojiPicker) {
+      setTimeout(() => scrollToBottom(), 500);
+    }
+  };
+
   return (
     <div style={{ width: '100%', height: '100%', overflow: 'hidden', fontFamily: 'Arial, sans-serif' }}>
       {/* Conversation List View */}
@@ -110,19 +141,16 @@ function FooterChatBar() {
           transition: 'transform 0.3s'
         }}
       >
-        {/* Header with Search */}
         <div style={{
           padding: '12px 16px',
           background: '#fff',
           borderBottom: '1px solid #e0e0e0'
         }}>
-          {/* Top Row: Menu Icon and Messages Title */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             marginBottom: '12px'
           }}>
-            {/* Menu Icon */}
             <svg 
               style={{ width: '28px', height: '28px', cursor: 'pointer', fill: '#666' }}
               xmlns="http://www.w3.org/2000/svg" 
@@ -131,7 +159,6 @@ function FooterChatBar() {
               <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
             </svg>
 
-            {/* Messages Title */}
             <div style={{
               flex: 1,
               textAlign: 'center',
@@ -144,7 +171,6 @@ function FooterChatBar() {
             </div>
           </div>
 
-          {/* Search Bar */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -174,7 +200,6 @@ function FooterChatBar() {
           </div>
         </div>
 
-        {/* Conversation Item */}
         <div 
           onClick={openChat}
           style={{
@@ -188,7 +213,6 @@ function FooterChatBar() {
           onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
           onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
         >
-          {/* Avatar */}
           <div style={{
             width: '52px',
             height: '52px',
@@ -206,7 +230,6 @@ function FooterChatBar() {
             DS
           </div>
 
-          {/* Conversation Details */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
               display: 'flex',
@@ -245,10 +268,10 @@ function FooterChatBar() {
           transform: showChat ? 'translateX(0)' : 'translateX(100%)',
           transition: 'transform 0.3s',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          overflow: 'hidden'
         }}
       >
-        {/* Header Navbar */}
         <div style={{
           position: 'fixed',
           top: 0,
@@ -261,7 +284,6 @@ function FooterChatBar() {
           alignItems: 'center',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
         }}>
-          {/* Back Arrow */}
           <svg 
             onClick={closeChat}
             style={{ width: '24px', height: '24px', marginRight: '12px', cursor: 'pointer', fill: '#666' }}
@@ -271,7 +293,6 @@ function FooterChatBar() {
             <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
           </svg>
 
-          {/* Avatar */}
           <div style={{
             width: '42px',
             height: '42px',
@@ -288,7 +309,6 @@ function FooterChatBar() {
             DS
           </div>
 
-          {/* Name and Status */}
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', lineHeight: '1.2' }}>
               Daddy Steve
@@ -298,7 +318,6 @@ function FooterChatBar() {
             </div>
           </div>
 
-          {/* Three Dots Menu */}
           <svg 
             style={{ width: '20px', height: '20px', cursor: 'pointer', fill: '#666' }}
             xmlns="http://www.w3.org/2000/svg" 
@@ -308,140 +327,143 @@ function FooterChatBar() {
           </svg>
         </div>
 
-        {/* Main Content */}
         <div 
           ref={contentRef}
           style={{ 
-            padding: '70px 18px 70px 18px',
+            padding: '70px 18px',
+            paddingBottom: showEmojiPicker ? '370px' : '70px',
             flex: 1,
             overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            transition: 'padding-bottom 0.3s ease',
+            position: 'relative',
+            zIndex: 1
+          }}>
+          <div style={{ 
+            minHeight: '100%',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end'
           }}>
-          {/* Render Messages */}
-          {messages.map((msg, index) => {
-            const isLongMessage = msg.text.length > 50;
-            const isMediumMessage = msg.text.length > 30 && msg.text.length <= 50;
-            const isShortMessage = msg.text.length <= 30;
+            {messages.map((msg, index) => {
+              const isLongMessage = msg.text.length > 50;
+              const isMediumMessage = msg.text.length > 30 && msg.text.length <= 50;
+              const isShortMessage = msg.text.length <= 30;
 
-            return (
-              <div 
-                key={index}
-                style={{
-                  display: 'flex',
-                  justifyContent: msg.sent ? 'flex-end' : 'flex-start',
-                  marginBottom: '8px'
-                }}
-              >
-                {/* Long Message (>50 chars) - Floating timestamp */}
-                {isLongMessage && (
-                  <div style={{
-                    background: msg.sent ? '#dcf8c6' : '#fff',
-                    borderRadius: '12px',
-                    padding: '8px 10px 4px 10px',
-                    maxWidth: '290px',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                  }}>
-                    <div style={{ fontSize: '14px', lineHeight: '1.3' }}>
-                      {msg.text}
-                      <span style={{
-                        float: 'right',
-                        marginLeft: '6px',
-                        fontSize: '11px',
-                        color: '#6b7280',
-                        whiteSpace: 'nowrap',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        position: 'relative',
-                        bottom: '-3px'
-                      }}>
-                        {msg.time}
-                        {msg.sent && (
-                          <svg width="12" height="12" viewBox="0 0 48 48">
-                            <path fill="#43A047" d="M40.6 12.1L17 35.7l-9.6-9.6L4.6 29L17 41.3l26.4-26.4z"/>
-                          </svg>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Medium Message (31-50 chars) - Stacked timestamp below */}
-                {isMediumMessage && (
-                  <div style={{
-                    background: msg.sent ? '#dcf8c6' : '#fff',
-                    borderRadius: '12px',
-                    padding: '8px 10px',
-                    maxWidth: '85%',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                  }}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ color: '#111', fontSize: '14px' }}>{msg.text}</span>
-                      <span style={{
-                        fontSize: '11px',
-                        color: '#6b7280',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        alignSelf: 'flex-end',
-                        marginTop: '4px'
-                      }}>
-                        {msg.time}
-                        {msg.sent && (
-                          <svg width="12" height="12" viewBox="0 0 48 48">
-                            <path fill="#43A047" d="M40.6 12.1L17 35.7l-9.6-9.6L4.6 29L17 41.3l26.4-26.4z"/>
-                          </svg>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Short Message (<=30 chars) - Inline timestamp */}
-                {isShortMessage && (
-                  <div style={{
-                    background: msg.sent ? '#dcf8c6' : '#fff',
-                    borderRadius: '12px',
-                    padding: '8px 10px',
-                    maxWidth: '85%',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                  }}>
+              return (
+                <div 
+                  key={index}
+                  style={{
+                    display: 'flex',
+                    justifyContent: msg.sent ? 'flex-end' : 'flex-start',
+                    marginBottom: '8px'
+                  }}
+                >
+                  {isLongMessage && (
                     <div style={{
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                      gap: '8px',
-                      whiteSpace: 'nowrap'
+                      background: msg.sent ? '#dcf8c6' : '#fff',
+                      borderRadius: '12px',
+                      padding: '8px 10px 4px 10px',
+                      maxWidth: '290px',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                     }}>
-                      <span style={{ color: '#111', fontSize: '14px' }}>{msg.text}</span>
-                      <span style={{
-                        fontSize: '11px',
-                        color: '#6b7280',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        flexShrink: 0
-                      }}>
-                        {msg.time}
-                        {msg.sent && (
-                          <svg width="12" height="12" viewBox="0 0 48 48">
-                            <path fill="#43A047" d="M40.6 12.1L17 35.7l-9.6-9.6L4.6 29L17 41.3l26.4-26.4z"/>
-                          </svg>
-                        )}
-                      </span>
+                      <div style={{ fontSize: '14px', lineHeight: '1.3' }}>
+                        {msg.text}
+                        <span style={{
+                          float: 'right',
+                          marginLeft: '6px',
+                          fontSize: '11px',
+                          color: '#6b7280',
+                          whiteSpace: 'nowrap',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          position: 'relative',
+                          bottom: '-3px'
+                        }}>
+                          {msg.time}
+                          {msg.sent && (
+                            <svg width="12" height="12" viewBox="0 0 48 48">
+                              <path fill="#43A047" d="M40.6 12.1L17 35.7l-9.6-9.6L4.6 29L17 41.3l26.4-26.4z"/>
+                            </svg>
+                          )}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  )}
+
+                  {isMediumMessage && (
+                    <div style={{
+                      background: msg.sent ? '#dcf8c6' : '#fff',
+                      borderRadius: '12px',
+                      padding: '8px 10px',
+                      maxWidth: '85%',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                    }}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ color: '#111', fontSize: '14px' }}>{msg.text}</span>
+                        <span style={{
+                          fontSize: '11px',
+                          color: '#6b7280',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          alignSelf: 'flex-end',
+                          marginTop: '4px'
+                        }}>
+                          {msg.time}
+                          {msg.sent && (
+                            <svg width="12" height="12" viewBox="0 0 48 48">
+                              <path fill="#43A047" d="M40.6 12.1L17 35.7l-9.6-9.6L4.6 29L17 41.3l26.4-26.4z"/>
+                            </svg>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {isShortMessage && (
+                    <div style={{
+                      background: msg.sent ? '#dcf8c6' : '#fff',
+                      borderRadius: '12px',
+                      padding: '8px 10px',
+                      maxWidth: '85%',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-end',
+                        gap: '8px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        <span style={{ color: '#111', fontSize: '14px' }}>{msg.text}</span>
+                        <span style={{
+                          fontSize: '11px',
+                          color: '#6b7280',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          flexShrink: 0
+                        }}>
+                          {msg.time}
+                          {msg.sent && (
+                            <svg width="12" height="12" viewBox="0 0 48 48">
+                              <path fill="#43A047" d="M40.6 12.1L17 35.7l-9.6-9.6L4.6 29L17 41.3l26.4-26.4z"/>
+                            </svg>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Fixed Footer */}
         <div style={{
           position: 'fixed',
-          bottom: 0,
+          bottom: showEmojiPicker ? '300px' : 0,
           left: 0,
           right: 0,
           zIndex: 10,
@@ -449,21 +471,20 @@ function FooterChatBar() {
           padding: '6px 10px',
           display: 'flex',
           alignItems: 'flex-end',
-          border: 'none'
+          border: 'none',
+          transition: 'bottom 0.3s ease'
         }}>
-          {/* Left Icon - Attachment */}
           <svg 
             style={{ width: '25px', height: '29px', marginRight: '10px', marginBottom: '7px', flexShrink: 0, fill: '#666666', cursor: 'pointer' }}
             xmlns="http://www.w3.org/2000/svg" 
             viewBox="0 0 24 24"
             onClick={handleAttachment}
           >
-            <g className="attachment-clip-outline">
+            <g>
               <path fill="#666666" fillRule="evenodd" d="M8 7.308c0-.558.186-1.434.659-2.14C9.1 4.504 9.779 4 10.88 4c1.134 0 1.88.499 2.373 1.155c.52.692.746 1.555.746 2.153v7.54a.8.8 0 0 1-.073.223c-.065.141-.166.3-.3.447c-.269.295-.61.482-1.002.482c-.436 0-.777-.18-1.02-.433c-.263-.274-.355-.574-.355-.72v-7.56a1 1 0 0 0-2 0v7.56c0 .75.358 1.527.912 2.105A3.38 3.38 0 0 0 12.625 18c1.085 0 1.93-.532 2.48-1.134c.517-.567.895-1.335.895-2.02V7.308c0-1.001-.35-2.292-1.146-3.354C14.029 2.856 12.716 2 10.88 2c-1.867 0-3.13.925-3.885 2.055A6.13 6.13 0 0 0 6 7.308v8.695C6 19.402 9.003 22 12.5 22c3.498 0 6.5-2.597 6.5-5.997V7a1 1 0 1 0-2 0v9.003C17 18.123 15.079 20 12.5 20C9.923 20 8 18.122 8 16.003z" clipRule="evenodd"/>
             </g>
           </svg>
 
-          {/* Input Box Wrapper */}
           <div style={{
             flex: 1,
             display: 'flex',
@@ -476,22 +497,25 @@ function FooterChatBar() {
             boxSizing: 'border-box',
             overflowY: 'auto'
           }}>
-            {/* Emoji Icon */}
             <svg 
-              style={{ width: '21px', height: '21px', flexShrink: 0, marginRight: '10px' }}
+              onClick={toggleEmojiPicker}
+              style={{ width: '21px', height: '21px', flexShrink: 0, marginRight: '10px', cursor: 'pointer' }}
               xmlns="http://www.w3.org/2000/svg" 
               viewBox="0 0 512 512"
             >
               <path fill="#666666" d="M464 256a208 208 0 1 0-416 0a208 208 0 1 0 416 0M0 256a256 256 0 1 1 512 0a256 256 0 1 1-512 0m177.3 63.4c15 15.6 41.1 32.6 78.7 32.6s63.7-17 78.7-32.6c9.2-9.6 24.4-9.9 33.9-.7s9.9 24.4.7 33.9c-22.1 23-60 47.4-113.3 47.4s-91.2-24.4-113.3-47.4c-9.2-9.6-8.9-24.8.7-33.9s24.8-8.9 33.9.7M144 208a32 32 0 1 1 64 0a32 32 0 1 1-64 0m192-32a32 32 0 1 1 0 64a32 32 0 1 1 0-64"/>
             </svg>
 
-            {/* Editable Input */}
             <div
               ref={inputRef}
               contentEditable
               role="textbox"
               aria-label="Message input"
               onInput={handleInput}
+              onFocus={() => {
+                setShowEmojiPicker(false);
+                setTimeout(() => scrollToBottom(), 500);
+              }}
               style={{
                 flex: 1,
                 fontSize: '14px',
@@ -507,37 +531,49 @@ function FooterChatBar() {
             />
           </div>
 
-          {/* Right Icon - Microphone or Send Button */}
-          {message.trim() === '' ? (
-            <svg 
-              style={{ width: '25px', height: '29px', marginLeft: '10px', marginBottom: '7px', flexShrink: 0, fill: '#666666', cursor: 'pointer' }}
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 256 256"
-              onClick={handleMicrophone}
-            >
-              <path fill="#666666" d="M128 176a48.05 48.05 0 0 0 48-48V64a48 48 0 0 0-96 0v64a48.05 48.05 0 0 0 48 48ZM96 64a32 32 0 0 1 64 0v64a32 32 0 0 1-64 0Zm40 143.6V232a8 8 0 0 1-16 0v-24.4A80.11 80.11 0 0 1 48 128a8 8 0 0 1 16 0a64 64 0 0 0 128 0a8 8 0 0 1 16 0a80.11 80.11 0 0 1-72 79.6Z"/>
-            </svg>
-          ) : (
-            <button 
-              onClick={sendMessage}
-              style={{
-                padding: '6px',
-                flexShrink: 0,
-                alignSelf: 'flex-end',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '3px'
-              }}
-            >
-              <svg viewBox="0 -0.5 21 21" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2.61258 9L0.05132 1.31623C-0.22718 0.48074 0.63218 -0.28074 1.42809 0.09626L20.4281 9.0963C21.1906 9.4575 21.1906 10.5425 20.4281 10.9037L1.42809 19.9037C0.63218 20.2807 -0.22718 19.5193 0.05132 18.6838L2.61258 11H8.9873C9.5396 11 9.9873 10.5523 9.9873 10C9.9873 9.4477 9.5396 9 8.9873 9H2.61258z" fill="#3b82f6" fillRule="evenodd" clipRule="evenodd" />
+          <div style={{ width: '40px', flexShrink: 0, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+            {message.trim() === '' ? (
+              <svg 
+                style={{ width: '25px', height: '29px', marginBottom: '7px', fill: '#666666', cursor: 'pointer' }}
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 256 256"
+                onClick={handleMicrophone}
+              >
+                <path fill="#666666" d="M128 176a48.05 48.05 0 0 0 48-48V64a48 48 0 0 0-96 0v64a48.05 48.05 0 0 0 48 48ZM96 64a32 32 0 0 1 64 0v64a32 32 0 0 1-64 0Zm40 143.6V232a8 8 0 0 1-16 0v-24.4A80.11 80.11 0 0 1 48 128a8 8 0 0 1 16 0a64 64 0 0 0 128 0a8 8 0 0 1 16 0a80.11 80.11 0 0 1-72 79.6Z"/>
               </svg>
-            </button>
-          )}
+            ) : (
+              <button 
+                onClick={sendMessage}
+                style={{
+                  padding: '6px',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '3px'
+                }}
+              >
+                <svg viewBox="0 -0.5 21 21" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.61258 9L0.05132 1.31623C-0.22718 0.48074 0.63218 -0.28074 1.42809 0.09626L20.4281 9.0963C21.1906 9.4575 21.1906 10.5425 20.4281 10.9037L1.42809 19.9037C0.63218 20.2807 -0.22718 19.5193 0.05132 18.6838L2.61258 11H8.9873C9.5396 11 9.9873 10.5523 9.9873 10C9.9873 9.4477 9.5396 9 8.9873 9H2.61258z" fill="#3b82f6" fillRule="evenodd" clipRule="evenodd" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div style={{
+          position: 'fixed',
+          bottom: showEmojiPicker ? 0 : '-300px',
+          left: 0,
+          right: 0,
+          height: '300px',
+          background: '#fff',
+          zIndex: 9,
+          transition: 'bottom 0.3s ease',
+          boxShadow: '0 -2px 10px rgba(0,0,0,0.1)'
+        }}>
         </div>
       </div>
     </div>
@@ -548,3 +584,4 @@ ReactDOM.render(<FooterChatBar />, document.getElementById('root'));
 </script>
 </body>
 </html>
+
